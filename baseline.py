@@ -145,16 +145,25 @@ def model():
 		else:
 			neg.append(transcripts[i])
 
-	vec = TfidfVectorizer(stop_words='english')
-	vec.fit_transform(pos)
-	words = vec.get_feature_names()
-	indices = np.argsort(vec.idf_)[::-1]
-	print [words[i] for i in indices[:10]]
+	vals = {}
 
-	vec.fit_transform(neg)
-	words = vec.get_feature_names()
-	indices = np.argsort(vec.idf_)[::-1]
-	print [words[i] for i in indices[:10]]
+	for transcript in transcripts:
+		for word in transcript.split():
+			total = 0.0
+			val = 0.0
+			for tran in pos:
+				if word in tran:
+					total += 1
+					val += 1
+			for tran in neg:
+				if word in tran:
+					total += 1
+					val -= 1
+			vals[word] = val / total * np.log(len(transcripts)/total)
+
+	vals = sorted(vals.items(), key=operator.itemgetter(1))
+	print zip(*vals[:20])[0]
+	print zip(*vals[-20:])[0]
 
 
 model()
